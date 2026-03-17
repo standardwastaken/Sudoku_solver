@@ -164,9 +164,9 @@ class Sudoku:
 				for cell in coll:
 					if cell.value == i:
 						break
-					elif cell.value ==0 and cell.cand[True] and solution == None:
+					elif cell.value ==0 and cell.cand[i] and solution == None:
 						solution = cell
-					elif cell.value ==0 and cell.cand[True]:
+					elif cell.value ==0 and cell.cand[i]:
 						solution = None
 						break
 				if solution != None:
@@ -178,9 +178,9 @@ class Sudoku:
 				for cell in row:
 					if cell.value == i:
 						break
-					elif cell.value ==0 and cell.cand[True] and solution == None:
+					elif cell.value ==0 and cell.cand[i] and solution == None:
 						solution = cell
-					elif cell.value ==0 and cell.cand[True]:
+					elif cell.value ==0 and cell.cand[i]:
 						solution = None
 						break
 				if solution != None:
@@ -192,9 +192,9 @@ class Sudoku:
 				for cell in box:
 					if cell.value == i:
 						break
-					elif cell.value ==0 and cell.cand[True] and solution == None:
+					elif cell.value ==0 and cell.cand[i] and solution == None:
 						solution = cell
-					elif cell.value ==0 and cell.cand[True]:
+					elif cell.value ==0 and cell.cand[i]:
 						solution = None
 						break
 				if solution != None:
@@ -210,23 +210,16 @@ class Sudoku:
 	def main(self,zadani=0):#solvne cely sudoku, postupne v loopu vola dílčí fce
 		self.vloz_zadani(zadani)
 		print("jdu na to")
+		print(self)
 		while True:
 			if self.nakedsingle():
 				pass
 			else:
 				break
 		self.backtrack()
-		
+'''		
 Board = Sudoku()
-Board.main([['0', '0', '0', '0', '2', '0', '6', '0', '0'],
-			['0', '0', '0', '0', '0', '0', '0', '7', '4'],
-			['0', '0', '0', '9', '1', '0', '0', '0', '0'],
-			['0', '2', '0', '0', '0', '0', '0', '0', '9'],
-			['4', '1', '6', '0', '0', '0', '0', '0', '0'],
-			['0', '9', '0', '4', '0', '0', '5', '0', '0'],
-			['0', '0', '0', '0', '6', '0', '0', '5', '0'],
-			['7', '0', '0', '1', '0', '2', '0', '0', '0'],
-			['6', '0', '8', '0', '0', '0', '0', '3', '0']])
+Board.main(1)'''
 
 
 

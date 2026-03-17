@@ -1,16 +1,16 @@
-#https://openclipart.org/detail/191039/yes-mark
+# No solution, kdyz solvnu a pak smazu cislo
+# 
+
+
 
 from pygame import *
 from sudoku import Sudoku
 init()
 display.init()
 
-
 screensize = (1000,500)
 window = display.set_mode(screensize)
 window.fill((200,200,200))
-
-
 
 #tweakables
 border_offset = 20
@@ -136,25 +136,31 @@ def solve(self,zadani=0):#solvne cely sudoku, postupne v loopu vola dílčí fce
 		self.vloz_zadani(zadani)
 		print("jdu na to")
 		while True:
+			unsolved = True
 			if functions['Naked single']:
 				if self.nakedsingle():
+					unsolved = False
 					grid_draw()
 			elif functions['Hidden single']:
 				if self.hiddensingle():
+					unsolved = False
 					grid_draw()
-			else:
+			if unsolved:
 				break
-		self.backtrack()
+		if functions['Backtracking']:
+			self.backtrack()
+		grid_draw()
+
 Board = Sudoku()
-Board.vloz_zadani([['0', '0', '0', '0', '2', '0', '6', '0', '0'],
-					['0', '0', '0', '0', '0', '0', '0', '7', '4'],
-					['0', '0', '0', '9', '1', '0', '0', '0', '0'],
-					['0', '2', '0', '0', '0', '0', '0', '0', '9'],
-					['4', '1', '6', '0', '0', '0', '0', '0', '0'],
-					['0', '9', '0', '4', '0', '0', '5', '0', '0'],
-					['0', '0', '0', '0', '6', '0', '0', '5', '0'],
-					['7', '0', '0', '1', '0', '2', '0', '0', '0'],
-					['6', '0', '8', '0', '0', '0', '0', '3', '0']])
+Board.vloz_zadani([['8', '0', '7', '0', '0', '0', '0', '0', '0'],
+					['0', '3', '1', '0', '0', '2', '4', '0', '0'],
+					['0', '4', '0', '0', '0', '0', '0', '5', '2'],
+					['9', '6', '0', '4', '1', '0', '8', '7', '0'],
+					['1', '0', '0', '7', '0', '3', '9', '2', '0'],
+					['0', '0', '4', '9', '0', '8', '1', '0', '0'],
+					['4', '0', '6', '1', '0', '7', '2', '3', '0'],
+					['7', '5', '3', '0', '0', '0', '0', '9', '1'],
+					['0', '1', '0', '0', '0', '6', '5', '0', '0']])
 grid_draw()
 running = True
 while running:	
@@ -165,8 +171,7 @@ while running:
 			mouse_select()
 		if i.type == KEYDOWN:
 			if i.key == K_s:
-				Board.main()
-				grid_draw()
+				solve(Board)
 			if i.key == K_LEFT:
 				cell_select(True,selected_cell[1]-1, selected_cell[2])
 			if i.key == K_RIGHT or i.key == K_TAB:
