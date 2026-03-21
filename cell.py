@@ -11,7 +11,7 @@ class Cell:
 
 	def __str__(self):
 		return str(self.value)
-		#return f'x{self.x}y{self.y}'
+
 	def cand_count(self):
 		a = 0
 		for i in self.cand[1::]:

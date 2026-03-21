@@ -1,8 +1,7 @@
-#https://sudoku.com/
 #udelat nejakej .md soubor na poznamky 
-
 from cell import Cell
 from houses import Coll, Row, Box
+from copy import deepcopy
 
 class Sudoku:
 	def __init__(self):
@@ -39,14 +38,14 @@ class Sudoku:
 					boxi+=1
 			self.boxes[bi] = Box(bi,box)
 	
-	def __str__(self):
+	def __str__(self): #TODO odebrat? (i v Cell a Houses)
 		output =  [str(_) for _ in self.rows]
 		tisk = ''
 		for i in output:
 			tisk+=i+'\n'
 		return tisk
 	
-	def vloz_zadani(self, zadani=0):
+	def vloz_zadani(self, zadani=0): #TODO mozna smazat pozdeji #TODO rename to import()
 		if zadani==0:
 			pass
 		elif zadani==1:
@@ -73,12 +72,17 @@ class Sudoku:
 			else:
 				raise Exception.Invalid_zadani
 
+	def export(self):
+		export = self.grid.copy()
+		for y in range(9):
+			for x in range(9):
+				export[y][x] = self.grid[y][x].copy()
+
 	def val(self,x,y,value): #set value of a cell
 		
 		cell = self.grid[y][x]
-		value =int(value)
 		#check if value is valid
-		if value !=0 and (self.contains('coll',cell.x,value) or self.contains('row',cell.y,value) or self.contains('box',cell.b,value)):
+		if not self.possible(cell,value):
 			raise Exception('Value_error.illigal_move')
 		oldvalue = cell.value
 		cell.value = value
@@ -99,7 +103,9 @@ class Sudoku:
 			if self.possible(i, oldvalue):
 				i.cand[oldvalue] = True
 	
-	def contains(self, type, coordinate, value): #check if a value is in a container
+	def contains(self, type, coordinate, value): #check if a value is in a container #TODO dat do possible(), pokud to nebude pouzivat nikdo jinej
+		if value==0:
+			return False
 		if coordinate<0 or coordinate>8:
 			raise Exception.Invalid_coordinate
 		if type == 'coll':
@@ -120,7 +126,7 @@ class Sudoku:
 		else:
 			raise Exception.Type_error.unknown_type
 	
-	def possible(self, cell, value):
+	def possible(self, cell, value): #check if value is possible
 		if self.contains("coll",cell.x, value):
 			return False
 		elif self.contains("row",cell.y, value):
@@ -130,7 +136,12 @@ class Sudoku:
 		else:
 			return True
 	
-	def backtrack(self): #todo? #kinda incompatible s candidates
+	def solved(self): #returns 0 if unsolved, 1 if full, 2 if full and solved #TODO
+		return 0
+
+	def backtrack(self,solution_count=0): #bruteforce
+		if solution_count>2:
+			return solution_count
 		global done; done = False
 		for y in range(9):
 			for x in range(9):
@@ -138,14 +149,25 @@ class Sudoku:
 					for i in range(1,10):
 						if self.grid[y][x].cand[i] and self.possible(self.grid[y][x],i):
 							self.grid[y][x].value = i
-							self.backtrack()
-							if done:
-								return
+							output = self.backtrack(solution_count)
+							if isinstance(output,int):
+								solution_count = output
+							else:
+								solution_count=1
+							if done ==True:
+								done = False
+								print(f'zvedam {solution_count}')
+								solution_count+=1
+								global solution
+								solution = deepcopy(self)
 							self.grid[y][x].value = 0
-					return		
-		done = True
+					if solution_count ==1:
+						return solution
+					return solution_count
+		done =True
+		return solution_count
 	
-	def nakedsingle(self): #if cell has only one candidate, make it its vallue
+	def nakedsingle(self): #if cell has only one candidate, make it its value
 		for y in range(9):
 			for x in range(9):
 				if self.grid[y][x].value == 0:
@@ -157,11 +179,11 @@ class Sudoku:
 					elif self.grid[y][x].cand_count() == 0:
 						raise Exception('No solution')
 		return False
-	def hiddensingle(self): #todo #if value is possilble only in one place in container, place it there
+	def hiddensingle(self): #if value is possilble only in one place in a house, make it its value #TODO upravit podle hidden pairs etc
 		for coll in self.colls:
 			for i in range(1,10):
 				solution = None
-				for cell in coll:
+				for cell in coll.cont:
 					if cell.value == i:
 						break
 					elif cell.value ==0 and cell.cand[i] and solution == None:
@@ -175,7 +197,7 @@ class Sudoku:
 		for row in self.rows:
 			for i in range(1,10):
 				solution = None
-				for cell in row:
+				for cell in row.cont:
 					if cell.value == i:
 						break
 					elif cell.value ==0 and cell.cand[i] and solution == None:
@@ -189,7 +211,7 @@ class Sudoku:
 		for box in self.boxes:
 			for i in range(1,10):
 				solution = None
-				for cell in box:
+				for cell in box.cont:
 					if cell.value == i:
 						break
 					elif cell.value ==0 and cell.cand[i] and solution == None:
@@ -201,25 +223,19 @@ class Sudoku:
 					self.val(solution.x,solution.y,i)
 					return True
 		return False
-		
 
-	
-	
-	
-	
-	def main(self,zadani=0):#solvne cely sudoku, postupne v loopu vola dílčí fce
-		self.vloz_zadani(zadani)
-		print("jdu na to")
-		print(self)
-		while True:
-			if self.nakedsingle():
-				pass
-			else:
-				break
-		self.backtrack()
-'''		
-Board = Sudoku()
-Board.main(1)'''
+'''Board=Sudoku()		
+Board.vloz_zadani([['8', '0', '7', '0', '0', '0', '0', '0', '0'],
+					['0', '3', '1', '0', '0', '2', '4', '0', '0'],
+					['0', '4', '0', '0', '0', '0', '0', '5', '2'],
+					['9', '6', '0', '4', '1', '0', '8', '7', '0'],
+					['1', '0', '0', '7', '0', '3', '9', '2', '0'],
+					['0', '0', '4', '9', '0', '8', '1', '0', '0'],
+					['4', '0', '6', '1', '0', '7', '2', '3', '0'],
+					['7', '5', '3', '0', '0', '0', '0', '9', '1'],
+					['0', '1', '0', '0', '0', '6', '5', '0', '0']])
+Board.backtrack(0)'''
+
 
 
 
