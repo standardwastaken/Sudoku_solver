@@ -98,7 +98,7 @@ class Sudoku:
 					if input_row[x] != "0":
 						self.val(x,y,int(input_row[x]))
 
-	def val(self,x,y,value): #set value of a cell #TODO spojit s house.cand
+	def val(self,x,y,value): #set value of a cell and updates all affected candidates
 		
 		cell = self.grid[y][x]
 		
@@ -241,7 +241,6 @@ class Sudoku:
 						
 						if self.grid[y][x].cand[i] and self.possible(self.grid[y][x],i):
 							
-
 							self.val(x,y,i)
 							output = self.backtrack(solution_count)
 							
@@ -288,7 +287,7 @@ class Sudoku:
 		
 		return 0
 	
-	def hiddensingle(self): #if value is possilble only in one place in a house, make it its value #TODO upravit podle hidden pairs etc
+	def hiddensingle(self): #if value is possilble only in one place in a house, make it its value 
 		
 		for coll in self.colls:
 			for i in range(1,10):
@@ -356,7 +355,7 @@ class Sudoku:
 		return 0
 
 
-
-
-
+							
+						
+						
 

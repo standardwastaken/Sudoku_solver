@@ -2,15 +2,6 @@ from pygame import *
 from sudoku import Sudoku
 from random import randint
 from copy import deepcopy
-from webbrowser import open as wb_open 
-
-#TODO hodne 
-# docs
-# support
-
-#TODO idealne
-# vic metod 
-
 
 #window
 screensize = (800,500)
@@ -20,11 +11,10 @@ caption ='Sudoku solver'
 background = (200,200,200)
 white = (185,185,220)
 black = (0,0,0)
-blue = (0,0,255)
+red = (255,0,0)
 
-#support
-support_button_size = 30
-support_link = 'https://github.com/standardwastaken/Sudoku_solver/blob/main/README.md'
+#new
+new_button_size = 30
 
 # grid
 messagefield_hight = 40
@@ -44,11 +34,11 @@ menu_outline = 1
 
 #fonts
 message_font_size = 26
-controls_font_size = (controls_width*2)//9
-function_font_size = (function_hight*3)//5
+controls_font_size = 17
+function_font_size = 27
 
 #lu coordinates
-grid_lug = support_button_size # grid left upper g coordinate
+grid_lug = new_button_size # grid left upper g coordinate
 grid_luf = 5 # grid left upper f coordinate
 controls_lug = grid_lug+grid_size+menu_grid_gab #controls left upper g coordinate 
 controls_luf = grid_luf+grid_outline #controls left upper f coordinate
@@ -57,6 +47,7 @@ function_luf = controls_luf+controls_hight+2*menu_outline #function left upper f
 
 #messages
 MSG_WELCOME = 'Welcome to Sudoku solver!'
+MSG_ONE_SOLUTION = 'This grid has exactly one solution!'
 MSG_NO_SOLUTION = 'This grid has no solution :('
 MSG_MULTIPLE_SOLUTIONS = 'This grid has multiple solutions'
 MSG_2_SOLUTIONS = 'This grid has 2 solutions'
@@ -74,18 +65,19 @@ starting_grid = [['8', '0', '7', '0', '0', '0', '0', '0', '0'],
 					['7', '5', '3', '0', '0', '0', '0', '9', '1'],
 					['0', '1', '0', '0', '0', '6', '5', '0', '0']]
 
-controls = [' Solve (S)',' Hint (H)',' Clear (C)']
+controls = [' Solve (S)',' Hint (H)',' Check (C)']
 
 NAKEDSINGLE = 'Naked single'
 HIDDENSINGLE = 'Hidden single'
+
 BACKTRACKING = 'Backtracking'
 
-functions={NAKEDSINGLE:True,HIDDENSINGLE:True,BACKTRACKING:True} 
+functions={NAKEDSINGLE:True, HIDDENSINGLE:True, BACKTRACKING:True} 
 functions_keys = [*functions.keys()]
 
 
 selected_cell = [False,0,0] 
-solution = None
+
 
 
 
@@ -151,10 +143,10 @@ def screen_draw(message=''):
 		text = font.SysFont("Segoe UI Symbol",function_font_size).render(func_icon(i)+str(functions_keys[i]),1,(20,120,20) if functions[functions_keys[i]] else (100,0,0))
 		window.blit(text,(function_lug+menu_outline,function_luf+menu_outline+function_hight*i, menu_width, function_hight))
 	
-	#support
-	draw.rect(window,blue,(0,0,support_button_size,support_button_size))
-	text = font.SysFont("notosans",(support_button_size*3)//4).render('?',1,white)
-	window.blit(text,(support_button_size//3,0,support_button_size,support_button_size))
+	#new
+	draw.rect(window,red,(0,0,new_button_size,new_button_size))
+	text = font.SysFont("Segoe UI Symbol",(new_button_size*3)//4).render(' ✕',1,white)
+	window.blit(text,(0,0,new_button_size,new_button_size))
 
 
 	display.update()
@@ -172,25 +164,22 @@ def func_select(i):
 	functions[functions_keys[i]] = not functions[functions_keys[i]]
 	screen_draw()
 
-def controls_select(i): 
+def controls_select(self,i): 
 	
 	if i==0:
-		solve(Board)
+		solve(self)
 	
 	elif i==1:
-		hint(Board)
+		hint(self)
 	
 	elif i==2:
-		clear(Board)
+		check(self)
 	
 
-def cell_select(Selected=False,x_change=0,y_change=0):
+def cell_select(Selected=False,x=0,y=0):
 	
 	global selected_cell; 
 	
-	x = selected_cell[1]+x_change
-	y = selected_cell[2]+y_change
-
 	if (x>8 and y==8) or (x==8 and y>8):
 		x=0
 		y=0
@@ -220,16 +209,16 @@ def cell_select(Selected=False,x_change=0,y_change=0):
 	screen_draw()
 
 def cell_select_up(self=None):
-	cell_select(True,0,-1)
+	cell_select(True,selected_cell[1],selected_cell[2]-1)
 
 def cell_select_down(self=None):
-	cell_select(True,0,1)
+	cell_select(True,selected_cell[1],selected_cell[2]+1)
 
 def cell_select_left(self=None):
-	cell_select(True,-1,0)
+	cell_select(True,selected_cell[1]-1,selected_cell[2])
 
 def cell_select_right(self=None):
-	cell_select(True,1,0)
+	cell_select(True,selected_cell[1]+1,selected_cell[2])
 
 
 def cell_highlight(x,y):
@@ -313,7 +302,7 @@ def solve(self):
 			if self.hiddensingle() ==1:
 				unsolved = False
 				screen_draw()
-		
+
 		if unsolved:
 			break
 	
@@ -357,13 +346,11 @@ def hint(self):
 		if self.hiddensingle():
 			screen_draw()
 			return
-	
+
+
 	if functions[BACKTRACKING]:
 		
-		global solution
-		
-		if solution == None:
-			solution = self.backtrack()
+		solution = self.backtrack()
 		
 		if isinstance(solution,Sudoku):
 			
@@ -389,19 +376,30 @@ def hint(self):
 		return
 	
 	else:
-		screen_draw(MSG_MULTIPLE_SOLUTIONS)
+		screen_draw(MSG_NO_HINT_FOUND)
 
-def clear(self):
+def new(self):
 	
 	self.__init__()
 	screen_draw()
 
-def support(self=None):
+def check(self=None):
 	
-	wb_open(support_link)
+	solution = self.backtrack()
+		
+	if isinstance(solution,Sudoku):
+		screen_draw(MSG_ONE_SOLUTION)
+	
+	elif solution == 0:
+		screen_draw(MSG_NO_SOLUTION)
+	
+	elif solution ==2:
+		screen_draw(MSG_2_SOLUTIONS)
+	
+	elif solution >2:
+		screen_draw(MSG_MULTIPLE_SOLUTIONS)
 
-
-def mouse_select():
+def mouse_select(self):
 	
 	g,f = mouse.get_pos()
 	
@@ -433,19 +431,22 @@ def mouse_select():
 		g=g-(controls_lug+menu_outline)
 		i = g//controls_width
 		
-		controls_select(i)
+		controls_select(self,i)
 	
-	elif g<support_button_size and f<support_button_size:
-		support()
+	elif g<new_button_size and f<new_button_size:
+		
+		new(self)
+	
 	else:
+		
 		cell_select()
 
 
 keys = {K_s:	solve,
 		K_h:	hint,
-		K_c:	clear,
+		K_c:	check,
 		
-		K_F1:	support,
+		K_n:	new,
 		
 		K_LEFT:		cell_select_left,
 		
@@ -504,7 +505,7 @@ while running:
 			running = False
 		
 		if i.type == MOUSEBUTTONDOWN:
-			mouse_select()
+			mouse_select(Board)
 		
 		if i.type == KEYDOWN:
 			
