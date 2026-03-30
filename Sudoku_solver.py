@@ -383,8 +383,12 @@ def new(self):
 	self.__init__()
 	screen_draw()
 
-def check(self=None):
+def check(self):
 	
+	if self.solved():
+		screen_draw(MSG_ONE_SOLUTION)
+		return
+
 	solution = self.backtrack()
 		
 	if isinstance(solution,Sudoku):
