@@ -236,7 +236,7 @@ def insert(self,value): #insert value in cell and move selected cell
 	
 	global selected_cell
 	x = selected_cell[1]
-	y= selected_cell[2]
+	y = selected_cell[2]
 	
 	try:
 		self.val(x,y,value)
