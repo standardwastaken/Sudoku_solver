@@ -518,7 +518,7 @@ while running:
 				keys[i.key](Board)
 			
 			except:
-				pass
+				screen_draw()
 			
 			
 			

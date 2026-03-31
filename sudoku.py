@@ -79,25 +79,6 @@ class Sudoku:
 		else:
 			raise Exception(InvalidInput)
 
-	def import_input(self): #imports grid using input()
-		
-		for y in range(9):
-				
-				input_row = input()
-				
-				if len(input_row) == 17:
-					input_row = input_row.split()
-				
-				elif len(input_row) == 9:
-					pass
-				
-				else:
-					raise Exception(InvalidInput)
-				
-				for x in range(len(input_row)):
-					if input_row[x] != "0":
-						self.val(x,y,int(input_row[x]))
-
 	def val(self,x,y,value): #set value of a cell and updates all affected candidates
 		
 		cell = self.grid[y][x]

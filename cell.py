@@ -2,8 +2,6 @@ class Cell:
 	
 	def __init__(self, x, y):
 		
-		self.aname = f'x{x}y{y}'
-		
 		self.value = 0
 		self.cand = 10*[True]
 		
